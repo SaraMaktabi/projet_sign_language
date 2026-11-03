@@ -1,6 +1,6 @@
 # Compte rendu · TP2 : tester, sécuriser et appeler l'API MaintAI
 
-**Groupe :** …  ·  **Membres :** …  ·  **Date :** …
+**Groupe : projet_sign_language** …  ·  **Membres :** …  ·  **Date :** …
 
 > Remplissez chaque partie dans ce fichier, puis rendez-le avec la pull request du TP2.
 > Collez les sorties du terminal entre les lignes ``` (trois accents graves).
@@ -12,37 +12,48 @@
 Vos cinq requêtes, le code que vous aviez **prévu**, puis le code **obtenu** dans `/docs` :
 
 | Requête | Ce qui ne va pas | Code prévu | Code obtenu |
-|---|---|---|---|
-| 1 | champ manquant | | |
-| 2 | valeur absurde | | |
-| 3 | texte au lieu d'un nombre | | |
-| 4 | champ en trop | | |
-| 5 | mauvaise route | | |
+|---|---|---:|---:|
+| 1 | Champ manquant (`load_pct`) | 422 | 422 |
+| 2 | Valeur absurde (`load_pct = 250`) | 422 | 422 |
+| 3 | Texte au lieu d'un nombre (`temperature_c = "chaud"`) | 422 | 422 |
+| 4 | Champ en trop (`pressure`) | 422 | 422 |
+| 5 | Mauvaise route (`/v1/predicte`) | 404 | 404 |
 
 Une de vos prévisions était-elle fausse ? Laquelle, et pourquoi ?
 
+Aucune de nos prévisions n'était fausse. Les quatre premières requêtes sont refusées par la validation de Pydantic avec le code 422. La dernière retourne 404 car la route demandée n'existe pas.
 …
 
 Dernière ligne de `python -m pytest` avec `tests/test_casser.py` (dans `TP/TP1`) :
 
 ```
-(collez ici)
+==================================================================== 19 passed, 1 warning in 1.96s =======================================
 ```
 
 À quoi sert `@pytest.mark.parametrize` ? Combien de tests pytest compte-t-il pour votre fonction, et pourquoi ?
 
+@pytest.mark.parametrize permet d'exécuter la même fonction de test plusieurs fois avec des paramètres différents. Dans notre cas, pytest exécute cinq tests, un pour chaque ligne de CAS_REFUSES. Cela évite de répéter cinq fois le même code et permet d'identifier chaque cas dans le rapport.
 …
 
 ## 2. ruff
 
 Sortie de `ruff check .` dans `TP/TP1` :
 
-```
-(collez ici)
+
+``Found 5 errors.
+[*] 5 fixable with `--fix`.
+
+Après correction avec ruff check . --fix
+
+Found 7 errors (7 fixed, 0 remaining).`
+
 ```
 
 Quelle différence entre `ruff check .` et `python -m pytest` ? Que vérifie chacun ?
 
+ruff check . analyse le code source pour détecter les problèmes de qualité, les erreurs de style et les imports mal organisés. Il permet de garder un code propre et cohérent.
+
+python -m pytest exécute les tests automatisés pour vérifier que les fonctionnalités de l'application fonctionnent correctement et produisent les résultats attendus.
 …
 
 ## 3. Mise en place du TP2 (dans `TP/TP2`)
