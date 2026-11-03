@@ -31,9 +31,37 @@ const show = (cls, text) => {
 };
 
 document.getElementById("go").addEventListener("click", async () => {
-  const reading = Object.fromEntries(FEATURES.map(f => [f, Number(document.getElementById(f).value)]));
-  // TODO (TP2) : Envoyez reading en POST JSON à <url>/v1/predict avec l'en-tête X-API-Key (fetch), puis affichez le résultat ou l'erreur avec show()
-  show("err", "À compléter");
+  const reading = Object.fromEntries(
+    FEATURES.map(f => [
+      f,
+      Number(document.getElementById(f).value)
+    ])
+  );
+
+  const url = document.getElementById("url").value.trim();
+  const apiKey = document.getElementById("key").value;
+
+  try {
+    const response = await fetch(`${url}/v1/predict`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiKey
+      },
+      body: JSON.stringify(reading)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      show("err", `Erreur ${response.status} : ${JSON.stringify(data.detail)}`);
+    } else {
+      show("ok", JSON.stringify(data, null, 2));
+    }
+
+  } catch (error) {
+    show("err", `Erreur de connexion : ${error.message}`);
+  }
 });
 </script>
 </body>

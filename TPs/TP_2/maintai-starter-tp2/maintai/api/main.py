@@ -41,8 +41,10 @@ app.add_middleware(
     allow_headers=["Content-Type", "X-API-Key"],
 )
 
-# TODO (TP2) : Protégez toutes les routes /v1 : ajoutez require_api_key comme dépendance du router (dependencies=[Depends(...)])
-router = APIRouter(prefix="/v1")
+router = APIRouter(
+    prefix="/v1",
+    dependencies=[Depends(require_api_key)]
+)
 
 
 @app.get("/health", response_model=HealthOut)
