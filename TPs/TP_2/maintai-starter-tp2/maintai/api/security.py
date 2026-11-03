@@ -8,6 +8,7 @@ from maintai.config import get_settings
 
 def require_api_key(x_api_key: str | None = Header(default=None)) -> None:
     """Refuse la requête si la clé est absente ou fausse."""
+<<<<<<< Updated upstream
 
     expected_key = get_settings().api_key
 
@@ -22,3 +23,9 @@ def require_api_key(x_api_key: str | None = Header(default=None)) -> None:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Clé API manquante ou invalide"
         )
+=======
+    # TODO (TP2) : Comparez x_api_key à get_settings().api_key avec secrets.compare_digest : 401 si la clé est absente ou fausse, 500 si le serveur n'a pas de clé configurée
+    raise NotImplementedError
+
+ 
+>>>>>>> Stashed changes
