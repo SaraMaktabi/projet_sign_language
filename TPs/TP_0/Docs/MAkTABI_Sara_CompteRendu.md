@@ -1,5 +1,5 @@
    
-============================================================================= test session starts =============================================
+============================================================================= test session starts =========================== ===============
 platform win32 -- Python 3.13.12, pytest-9.1.1, pluggy-1.7.0
 rootdir: D:\Users\Sara\Documents\Semestre 9 IADA\app ai\S3_projet_a_completer\projet_a_completer
 configfile: pytest.ini
