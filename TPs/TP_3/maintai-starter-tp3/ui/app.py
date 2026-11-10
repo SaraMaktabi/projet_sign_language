@@ -28,13 +28,43 @@ onglet_donnees, onglet_prediction = st.tabs(["Données", "Prédiction"])
 # Sprint 1 : explorer les données
 with onglet_donnees:
     df = charger(get_settings().data_path)
-    # TODO TP3 sprint 1 :
-    #   1. trois indicateurs côte à côte (st.columns, puis .metric) :
-    #      le nombre de relevés, le taux de panne (df.failure.mean()), la température moyenne
-    #   2. une liste déroulante (st.selectbox) pour choisir une variable parmi FEATURES
-    #   3. le taux de panne par tranche de cette variable (pd.cut, groupby), en barres (st.bar_chart)
-    #   4. un nuage de points température / vibration, coloré par panne (st.scatter_chart)
-    st.info("Sprint 1 : les indicateurs et les graphiques viendront ici.")
+
+    # 1. Trois indicateurs
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("Nombre de relevés", len(df))
+    col2.metric("Taux de panne", f"{df.failure.mean():.1%}")
+    col3.metric("Température moyenne", f"{df.temperature_c.mean():.1f} °C")
+
+    # 2. Choisir une variable
+    variable = st.selectbox("Choisir une variable", FEATURES)
+
+    # 3. Taux de panne par tranche
+    tranches = pd.cut(df[variable], bins=10)
+    taux = df.groupby(tranches, observed=True).failure.mean()
+
+    graphique = pd.DataFrame({
+        "Milieu de tranche": [round(i.mid, 2) for i in taux.index],
+        "Taux de panne": taux.values
+    })
+
+    st.subheader(f"Taux de panne selon {variable}")
+    st.bar_chart(graphique.set_index("Milieu de tranche"))
+
+    # 4. Nuage de points température / vibration
+    df_nuage = df.copy()
+    df_nuage["Panne"] = df_nuage["failure"].map({
+        0: "Non",
+        1: "Oui"
+    })
+
+    st.subheader("Température et vibration selon la panne")
+    st.scatter_chart(
+        df_nuage,
+        x="temperature_c",
+        y="vibration_mm_s",
+        color="Panne"
+    )
 
 
 # Sprint 2 : demander une prédiction à l'API
@@ -49,8 +79,22 @@ with onglet_prediction:
         envoye = st.form_submit_button("Prédire")
 
     if envoye:
-        # TODO TP3 sprint 2 :
-        #   1. créer MaintaiClient(url, api_key=cle) et appeler .predict(releve)
-        #   2. APIError → st.warning avec le code et le message ; httpx.HTTPError → st.error("API injoignable ...")
-        #   3. sinon : st.metric("Probabilité de panne", f"{pct} %"), puis st.error (alerte) ou st.success (normal)
-        st.info("Sprint 2 : la prédiction s'affichera ici.")
+        try:
+            client = MaintaiClient(url, api_key=cle)
+            resultat = client.predict(releve)
+
+        except APIError as e:
+            st.warning(f"Erreur {e.status_code} : {e.detail}")
+
+        except httpx.HTTPError as e:
+            st.error(f"API injoignable : {e}")
+
+        else:
+            pct = round(resultat["failure_probability"] * 100)
+
+            st.metric("Probabilité de panne", f"{pct} %")
+
+            if resultat["alert"]:
+                st.error("ALERTE : risque de panne détecté !")
+            else:
+                st.success("Fonctionnement normal : aucun risque de panne détecté.")
