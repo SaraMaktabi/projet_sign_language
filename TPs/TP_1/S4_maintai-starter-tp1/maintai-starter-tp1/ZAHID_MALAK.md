@@ -5,7 +5,7 @@
 ## 1. Mise en place
 
 Après l'installation, avant d'implémenter le schéma et la fonction `predict`, la
-dernière ligne obtenue avec `python -m pytest` était :
+dernière ligne obtenue avec `python -m pytest` était : qA
 
 ```text
 3 failed, 10 passed, 1 warning in 19.32s
