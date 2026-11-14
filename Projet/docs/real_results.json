@@ -1,0 +1,9 @@
+{
+  "n_images": 22,
+  "n_persons": 1,
+  "accuracy": 0.36363636363636365,
+  "f1_macro": 0.18771929824561404,
+  "accuracy_by_person": {
+    "malak": 0.3636
+  }
+}
