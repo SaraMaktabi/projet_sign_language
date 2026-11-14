@@ -1,7 +1,7 @@
 # Canvas — Sign Letter
 ## Reconnaissance de lettres en langue des signes et assistant d’apprentissage
 
-**Groupe :projet_sign_language** …  ·  **Membres :maktabi sara / IKSI Badreddine / ZAHID Malak** …  ·  **Date :10/11/2026** …
+**Groupe :projet_sign_language** …  ·  **Membres :maktabi sara / IKSI Badreddine / ZAHID Malak / ** …  ·  **Date :10/11/2026** …
 
 ## 1. Contexte et utilisateurs
 
