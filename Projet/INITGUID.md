@@ -33,6 +33,8 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 cd Projet
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
+python -m pip install mediapipe
+python -c "import mediapipe as mp; print(mp.__version__)"
 ```
 
 Installing TensorFlow can take a few minutes.
