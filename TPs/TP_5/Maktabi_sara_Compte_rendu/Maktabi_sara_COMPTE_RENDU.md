@@ -128,20 +128,28 @@ des versions des données sans stocker leur contenu.
 Après `python -m maintai.dataset --n 8000 --seed 7`, que dit `dvc status` ?
 
 ```
-(collez ici)
+data\sensors.csv.dvc:                                                                                                                                                             
+        changed outs:
+                modified:           data\sensors.csv
 ```
 
-| Version | Commit Git (`git log --oneline`) | md5 (8 premiers caractères) | Nombre de lignes |
+| Version | Commit Git | md5 (8 premiers caractères) | Nombre de lignes |
 |---|---|---|---|
-| v1 | | | |
-| v2 | | | |
+| v1 | 9edf02b | 73e0b7cb | 5000 |
+| v2 | bfcca7b | 93fdeef2 | 8000 |
 
 Revenez à la v1 (`git checkout <commit> -- data/sensors.csv.dvc`, puis `dvc checkout`). Combien de lignes contient `data/sensors.csv` ? Puis revenez à la v2.
 
+Après restauration de la v1, le fichier contient 5000 lignes.
+Après retour à la v2, il contient 8000 lignes.
+DVC permet donc de restaurer les différentes versions des données.
 …
 
 Supprimez `data/sensors.csv` et le dossier `.dvc/cache`, puis lancez `dvc pull`. Que se passe-t-il ?
 
+La commande `dvc pull` récupère les données depuis le stockage
+DVC, reconstitue le cache local et restaure le fichier
+`sensors.csv` contenant les 8000 lignes de la v2.
 …
 
 ## 4. Relier modèle et données
@@ -150,24 +158,89 @@ Entraînez un modèle sur la v2. Dans `mlflow ui`, comparez ce run à celui de l
 
 | Run | data_md5 (8 caractères) | n_train | recall | precision |
 |---|---|---|---|---|
-| v1 | | | | |
-| v2 | | | | |
+| v1 | 73e0b7cb | 4000 | 0.750 | 0.622 |
+| v2 | 93fdeef2 | 6400 | 0.741 | 0.650 |
 
 Peut-on dire que le modèle v2 est « meilleur » ? Pourquoi faut-il être prudent en comparant deux runs entraînés sur des données différentes ?
 
+Le modèle v2 présente une meilleure accuracy et une meilleure
+precision, mais un recall légèrement inférieur.
+
+On ne peut pas affirmer qu'il est meilleur, car les modèles
+ont été entraînés et évalués sur des données différentes.
+Une comparaison fiable nécessite un même jeu de test indépendant.
 …
 
 ## 5. Décision : l'ADR 004
 
 Dans `docs/adr/004-choix-du-modele.md` : le modèle et le seuil retenus, à partir de votre tableau MLflow. Indiquez l'identifiant du run et le `data_md5` de la version des données utilisée.
 
+# ADR 004 — Choix du modèle
+
+## Statut
+
+Accepté.
+
+## Contexte
+
+MaintAI doit prédire les pannes industrielles.
+Une panne non détectée est plus coûteuse qu'une fausse alerte.
+Le recall est donc la métrique prioritaire.
+
+## Décision
+
+Nous retenons la régression logistique avec un seuil de 0.2,
+entraînée sur la version v1 des données.
+
+## Justification
+
+Ce modèle présente le meilleur recall parmi les runs MLflow :
+
+- Accuracy : 88.2 %
+- Recall : 83.8 %
+- Precision : 54.3 %
+- Seuil : 0.2
+
+## Traçabilité
+
+- Run ID : 3314f3695ce845c398559b333339917f
+- Version des données : v1
+- Commit Git : 9edf02b
+- data_md5 : 73e0b7cb3c6f795c70c3ddf970b99c15
+
+## Conséquences
+
+La diminution du seuil permet de détecter davantage de pannes,
+mais augmente le nombre de fausses alertes.
+
+MLflow et DVC permettent de retrouver le modèle et la version
+exacte des données utilisées lors de son entraînement.
+
 ## 6. Questions de compréhension
 
-1. Quelle différence entre Git, DVC et MLflow ? Que versionne chacun ?
-   …
-2. Pourquoi le stockage DVC est-il ajouté avec `--local` dans ce TP ? Que faudrait-il pour que tout le groupe partage les mêmes données ?
-   …
-3. Livrer un modèle, c'est trois choses (TP4). Lesquelles, et où sont-elles maintenant ?
+1. **Quelle différence entre Git, DVC et MLflow ? Que versionne chacun ?**
+
+   - Git : versionne le code source et les fichiers de configuration.
+   - DVC : versionne les jeux de données.
+   - MLflow : assure le suivi des expériences, des hyperparamètres,
+     des métriques et des modèles entraînés.
+
+2. **Pourquoi le stockage DVC est-il ajouté avec `--local` dans ce TP ?
+   Que faudrait-il pour que tout le groupe partage les mêmes données ?**
+
+   L'option `--local` permet de conserver une configuration propre
+   à chaque machine, sans la versionner dans Git.
+   Pour partager les données, il faudrait configurer un stockage
+   distant commun, accessible à tous les membres du groupe.
+
+3. **Livrer un modèle, c'est trois choses (TP4).
+   Lesquelles, et où sont-elles maintenant ?**
+
+   - Le modèle entraîné : sauvegardé dans les artefacts MLflow.
+   - Le code de prédiction : versionné dans Git.
+   - Les dépendances : déclarées dans le `pyproject.toml` et
+     enregistrées avec leurs versions dans le `requirements.txt`
+     généré par MLflow.
    …
 
 ## 7. Le rendu Git
