@@ -1,6 +1,6 @@
 # Compte rendu · TP5 : suivre les entraînements (MLflow) et versionner les données (DVC)
 
-**Groupe :** …  ·  **Membres :** …  ·  **Date :** …
+**Groupe :projet_sign language** …  ·  **Membres :Maktabi_sara** …  ·  **Date :17/11/2016** …
 
 > Remplissez chaque partie dans ce fichier, puis rendez-le avec la pull request du TP5.
 > Collez les sorties du terminal entre les lignes ``` (trois accents graves).
@@ -12,11 +12,16 @@
 Dernière ligne de `python -m pytest` après `pip install -r requirements.txt` et `pip install -e .` :
 
 ```
-(collez ici)
+=========== 5 failed, 27 passed, 2 warnings in 9.22s ==========
 ```
 
 Quels tests échouent, et pourquoi ?
 
+FAILED tests/test_tracking.py::test_training_creates_a_run - AssertionError: aucun run MLflow : log_run n'a rien enregistré
+FAILED tests/test_tracking.py::test_run_records_metrics - AssertionError: aucun run MLflow : log_run n'a rien enregistré
+FAILED tests/test_tracking.py::test_run_records_data_version - AssertionError: aucun run MLflow : log_run n'a rien enregistré
+FAILED tests/test_tracking.py::test_run_stores_the_model - AssertionError: aucun run MLflow : log_run n'a rien enregistré
+FAILED tests/test_tracking.py::test_options_change_the_run - AssertionError: aucun run MLflow : log_run n'a rien enregistré
 …
 
 Avant `pip install -e .`, où pointait le package `maintai` installé dans l'environnement ? Et après ?
@@ -28,35 +33,68 @@ Avant `pip install -e .`, où pointait le package `maintai` installé dans l'env
 Votre fonction `log_run` (`maintai/tracking.py`) :
 
 ```python
-(collez ici)
+def log_run(params: dict, metrics: dict, model, X_example, data_path: Path) -> str:
+    """Enregistre un entraînement et renvoie l'identifiant du run."""
+
+    mlflow.set_experiment(EXPERIMENT)
+
+    with mlflow.start_run() as run:
+
+        mlflow.log_params(params)
+
+        mlflow.log_param("data_md5", file_md5(data_path))
+
+        mlflow.log_metrics(metrics)
+
+        mlflow.sklearn.log_model(
+            model,
+            name="model",
+            input_example=X_example,
+            skops_trusted_types=TRUSTED_TYPES
+        )
+
+        return run.info.run_id
 ```
 
 Dernière ligne de `python -m pytest` à la fin du sprint 1 :
 
 ```
-(collez ici)
+=================== 32 passed, 4 warnings in 23.04s ============
 ```
 
 Vos runs (au moins quatre), relevés dans `mlflow ui` (mode « Model training ») :
 
 | Commande | recall | precision | accuracy |
 |---|---|---|---|
-| `python -m maintai.train` | | | |
-| `python -m maintai.train --C 0.01` | | | |
-| `python -m maintai.train --threshold 0.2` | | | |
-| `python -m maintai.train --model forest` | | | |
-| (votre essai) | | | |
+| Par défaut | 0.750 | 0.622 | 0.904 |
+| --C 0.01 | 0.691 | 0.653 | 0.908 |
+| --threshold 0.2 | 0.838 | 0.543 | 0.882 |
+| --model forest | 0.728 | 0.562 | 0.886 |
 
 Quel run choisiriez-vous pour MaintAI, et pourquoi ? (Rappel : une panne manquée coûte plus cher qu'une fausse alerte.)
+Nous retenons la régression logistique avec un seuil de 0.2,
+car elle maximise le recall (83.8 %). Une panne manquée
+coûtant plus cher qu'une fausse alerte, nous acceptons
+une précision plus faible (54.3 %).
 
+La forêt aléatoire n'est pas meilleure dans cette comparaison,
+car son recall est inférieur (72.8 %).
 …
 
 Dans `mlflow ui`, ouvrez le modèle d'un run. Quelle version de scikit-learn est indiquée dans son `requirements.txt` ? Quel problème du TP4 cela règle-t-il ?
 
+scikit-learn==1.8.0
 …
 
 Où MLflow enregistre-t-il les runs sur votre disque ? Ces fichiers vont-ils dans Git ? Pourquoi ?
 
+MLflow enregistre les paramètres, les métriques et les
+informations des runs dans la base SQLite `mlflow.db`.
+Les modèles et les artefacts sont stockés dans `mlruns/`.
+
+Ces fichiers ne doivent pas être versionnés dans Git,
+car ce sont des fichiers générés automatiquement qui
+peuvent devenir volumineux.
 …
 
 ## 3. Sprint 2 : DVC
@@ -64,15 +102,27 @@ Où MLflow enregistre-t-il les runs sur votre disque ? Ces fichiers vont-ils dan
 Contenu de `data/sensors.csv.dvc` après `dvc add data/sensors.csv` :
 
 ```
-(collez ici)
+outs:
+- md5: 73e0b7cb3c6f795c70c3ddf970b99c15
+  size: 126815
+  hash: md5
+  path: sensors.csv
+
 ```
 
 Comparez la valeur `md5` de ce fichier au paramètre `data_md5` de votre dernier run MLflow. Que constatez-vous ?
-
+73e0b7cb3c6f795c70c3ddf970b99c15 
+same 
 …
 
 Pourquoi `data/sensors.csv` ne va pas dans Git, alors que `data/sensors.csv.dvc` y va ?
+Le fichier `sensors.csv` est géré par DVC afin d'éviter
+d'alourdir le dépôt Git avec des fichiers de données.
 
+Le fichier `sensors.csv.dvc` contient uniquement les
+métadonnées du dataset, notamment son empreinte MD5,
+sa taille et son chemin. Git conserve ainsi l'historique
+des versions des données sans stocker leur contenu.
 …
 
 Après `python -m maintai.dataset --n 8000 --seed 7`, que dit `dvc status` ?
