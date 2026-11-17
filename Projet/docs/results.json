@@ -17,9 +17,9 @@
     "ms_per_image": 145.7882261276245
   },
   "cnn_robuste": {
-    "accuracy": 0.9998605688789738,
-    "precision_macro": 0.9997126436781608,
-    "recall_macro": 0.9998741188318228,
-    "f1_macro": 0.9997927888784774
+    "accuracy": 1.0,
+    "precision_macro": 1.0,
+    "recall_macro": 1.0,
+    "f1_macro": 1.0
   }
 }
