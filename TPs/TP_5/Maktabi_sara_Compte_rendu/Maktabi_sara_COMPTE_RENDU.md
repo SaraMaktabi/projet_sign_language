@@ -1,6 +1,6 @@
 # Compte rendu · TP5 : suivre les entraînements (MLflow) et versionner les données (DVC)
 
-**Groupe :projet_sign language** …  ·  **Membres :Maktabi_sara** …  ·  **Date :17/11/2016** …
+**Groupe :projet_sign language** …  ·  **Membres :Maktabi_sara** …  ·  **Date :17/11/2016 18:00** …
 
 > Remplissez chaque partie dans ce fichier, puis rendez-le avec la pull request du TP5.
 > Collez les sorties du terminal entre les lignes ``` (trois accents graves).
