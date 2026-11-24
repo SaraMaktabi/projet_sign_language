@@ -1,6 +1,6 @@
 # Compte rendu · TP6 : conteneuriser MaintAI (Docker, Docker Compose)
 
-**Groupe :projet_sign_nagiage**   ·  **Membres :MAKTABI SARA**  ·  **Date :24/11/2026** 
+**Groupe :projet_sign_nagiage**   ·  **Membres :MAKTABI SARA**  ·  **Date :24/11/2026 17:39** 
 ---
 
 ## 1. Mise en place (dans `TP/TP6`)
