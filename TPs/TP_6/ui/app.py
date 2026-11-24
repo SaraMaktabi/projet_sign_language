@@ -22,9 +22,9 @@ def charger(path) -> pd.DataFrame:
 
 
 with st.sidebar:
-    # TODO TP6 sprint 2 : lire la valeur par défaut dans la variable d'environnement MAINTAI_API_URL
-    #   (os.getenv), et garder "http://localhost:8000" si elle n'existe pas
-    url = st.text_input("URL de l'API", "http://localhost:8000")
+    url = st.text_input(
+        "URL de l'API", os.getenv("MAINTAI_API_URL", "http://localhost:8000")
+    )
     cle = st.text_input("Clé API", type="password")
 
 onglet_donnees, onglet_prediction = st.tabs(["Données", "Prédiction"])
